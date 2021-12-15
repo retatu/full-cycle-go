@@ -2,6 +2,7 @@ package process_transaction
 
 import (
 	"github.com/golang/mock/gomock"
+	"github.com/retatu/fullcycle-gateway/adapter/broker/mock"
 	"github.com/retatu/fullcycle-gateway/domain/entity"
 	"github.com/retatu/fullcycle-gateway/domain/repository/mock"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,10 @@ func TestProcessTransactionExecuteInvalidCreditCard(t *testing.T) {
 		Insert(input.ID, input.AccountID, input.Amount, expectedOutput.Status, expectedOutput.ErrorMessage).
 		Return(nil)
 
-	useCase := NewProcessTransaction(repositoryMock)
+	producerMock := mock_broker.NewMockProducerInterface(ctrl)
+	producerMock.EXPECT().Publish(expectedOutput, []byte(input.ID), "transactions_result")
+
+	useCase := NewProcessTransaction(repositoryMock, producerMock, "transactions_result")
 	output, err := useCase.Execute(input)
 	assert.Nil(t, err)
 	assert.Equal(t, output, expectedOutput)
@@ -67,7 +71,10 @@ func TestProcessTransactionExecuteRejectedTransaction(t *testing.T) {
 		Insert(input.ID, input.AccountID, input.Amount, expectedOutput.Status, expectedOutput.ErrorMessage).
 		Return(nil)
 
-	useCase := NewProcessTransaction(repositoryMock)
+	producerMock := mock_broker.NewMockProducerInterface(ctrl)
+	producerMock.EXPECT().Publish(expectedOutput, []byte(input.ID), "transactions_result")
+
+	useCase := NewProcessTransaction(repositoryMock, producerMock, "transactions_result")
 	output, err := useCase.Execute(input)
 	assert.Nil(t, err)
 	assert.Equal(t, output, expectedOutput)
@@ -99,7 +106,10 @@ func TestProcessTransactionExecuteApprovedTransaction(t *testing.T) {
 		Insert(input.ID, input.AccountID, input.Amount, expectedOutput.Status, expectedOutput.ErrorMessage).
 		Return(nil)
 
-	useCase := NewProcessTransaction(repositoryMock)
+	producerMock := mock_broker.NewMockProducerInterface(ctrl)
+	producerMock.EXPECT().Publish(expectedOutput, []byte(input.ID), "transactions_result")
+
+	useCase := NewProcessTransaction(repositoryMock, producerMock, "transactions_result")
 	output, err := useCase.Execute(input)
 	assert.Nil(t, err)
 	assert.Equal(t, output, expectedOutput)
