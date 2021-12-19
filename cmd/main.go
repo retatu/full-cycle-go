@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
@@ -14,6 +15,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Running")
 	//db
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
@@ -24,14 +26,14 @@ func main() {
 	repository := repositoryFactory.CreateTransactionRepository()
 	//confiMapProducer
 	configMapProducer := &ckafka.ConfigMap{
-		"bootstrap.servers": "host.docker.internal:172.17.0.1",
+		"bootstrap.servers": "host.docker.internal:9094",
 	}
 	kafkaPresenter := transaction.NewTransactionKafkaPresenter()
 	//producer
 	producer := kafka.NewKafkaProducer(configMapProducer, kafkaPresenter)
 	//confiMapConsumer
 	configMapConsumer := &ckafka.ConfigMap{
-		"bootstrap.servers": "host.docker.internal:172.17.0.1",
+		"bootstrap.servers": "host.docker.internal:9094",
 		"client.id":         "goapp",
 		"group.id":          "goapp",
 	}
