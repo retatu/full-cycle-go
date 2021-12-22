@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"fmt"
+
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
@@ -19,10 +21,12 @@ func NewConsumer(configMap *ckafka.ConfigMap, topics []string) *Consumer {
 func (c *Consumer) Consume(msgChan chan *ckafka.Message) error {
 	consumer, err := ckafka.NewConsumer(c.ConfigMap)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	err = consumer.SubscribeTopics(c.Topics, nil)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 

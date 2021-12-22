@@ -1,6 +1,8 @@
 package process_transaction
 
 import (
+	"fmt"
+
 	"github.com/retatu/fullcycle-gateway/adapter/broker"
 	"github.com/retatu/fullcycle-gateway/domain/entity"
 	"github.com/retatu/fullcycle-gateway/domain/repository"
@@ -40,6 +42,7 @@ func (p *ProcessTransaction) Execute(input TransactionDtoInput) (TransactionDtoO
 func (p *ProcessTransaction) rejectTransaction(transaction *entity.Transaction, invalidTransaction error) (TransactionDtoOutput, error) {
 	err := p.Repository.Insert(transaction.ID, transaction.AccountID, transaction.Amount, entity.REJECTED, invalidTransaction.Error())
 	if err != nil {
+		fmt.Println(err.Error())
 		return TransactionDtoOutput{}, err
 	}
 	output := TransactionDtoOutput{
@@ -49,6 +52,7 @@ func (p *ProcessTransaction) rejectTransaction(transaction *entity.Transaction, 
 	}
 	err = p.publish(output, []byte(transaction.ID))
 	if err != nil {
+		fmt.Println(err.Error())
 		return TransactionDtoOutput{}, err
 	}
 	return output, nil
@@ -57,6 +61,7 @@ func (p *ProcessTransaction) rejectTransaction(transaction *entity.Transaction, 
 func (p *ProcessTransaction) approveTransaction(transaction *entity.Transaction) (TransactionDtoOutput, error) {
 	err := p.Repository.Insert(transaction.ID, transaction.AccountID, transaction.Amount, entity.APPROVED, "")
 	if err != nil {
+		fmt.Println(err.Error())
 		return TransactionDtoOutput{}, err
 	}
 
@@ -67,6 +72,7 @@ func (p *ProcessTransaction) approveTransaction(transaction *entity.Transaction)
 	}
 	err = p.publish(output, []byte(transaction.ID))
 	if err != nil {
+		fmt.Println(err.Error())
 		return TransactionDtoOutput{}, err
 	}
 	return output, nil
@@ -75,6 +81,7 @@ func (p *ProcessTransaction) approveTransaction(transaction *entity.Transaction)
 func (p *ProcessTransaction) publish(output TransactionDtoOutput, key []byte) error {
 	err := p.Producer.Publish(output, key, p.Topic)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	return nil

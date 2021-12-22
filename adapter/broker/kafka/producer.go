@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"fmt"
+
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/retatu/fullcycle-gateway/adapter/presenter"
 )
@@ -17,14 +19,17 @@ func NewKafkaProducer(configMap *ckafka.ConfigMap, presenter presenter.Presenter
 func (p *Producer) Publish(msg interface{}, key []byte, topic string) error {
 	producer, err := ckafka.NewProducer(p.ConfigMap)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	err = p.Presenter.Bind(msg)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	presenterMsg, err := p.Presenter.Show()
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	message := &ckafka.Message{
@@ -34,6 +39,7 @@ func (p *Producer) Publish(msg interface{}, key []byte, topic string) error {
 	}
 	err = producer.Produce(message, nil)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 	return nil
